@@ -1,0 +1,14 @@
+﻿settings
+	column headers borders
+
+
+
+
+
+scrape and store entire web in db
+	metalarchives
+	progarchives
+	wikipedia
+	spotify?
+	youtube?
+
