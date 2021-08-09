@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaztep.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,23 +9,23 @@ namespace Audio_Master
     { 
         public static Dictionary<string, string> GetTrackTimes(string txt)
         {
-            Dictionary<string, string> dictionary = new Dictionary<string, string>();
-            List<string> split = txt.Split('\n').ToList();
-            List<string> names = new List<string>();
-            List<string> times = new List<string>();
+            var dictionary = new Dictionary<string, string>();
+            var split = txt.Split('\n').ToList();
+            var names = new List<string>();
+            var times = new List<string>();
 
             foreach (string s in split)
             {
                 if (String.IsNullOrEmpty(s) || s.Length < 3)
                     continue;
 
-                string name = s.Replace("\r", "").TrimEnd().TrimStart();
+                string name = s.RemoveAll("\r").Trim();
                 string time = GetTime(name);
 
                 if (String.IsNullOrEmpty(time))
                     continue;
 
-                name = name.Replace(time, "").Replace("[]", "").Replace("()", "").TrimStart().TrimEnd();
+                name = name.RemoveAll(time, "[]", "()").Trim();
 
                 if (time.Length < 5 && time.IndexOf(":") == 1)
                     time = "0" + time;
@@ -45,17 +46,17 @@ namespace Audio_Master
 
         public static string GetTime(string s)
         {
-            string time = "";
+            string time = String.Empty;
             for (int i = 0; i < s.Length; i++)
             {
-                if (s[i].ToString() == ":" && i > 0 && IsNumber(s[i - 1]) && i < s.Length - 1 && IsNumber(s[i + 1]))
+                if (s[i].ToString() == ":" && i > 0 && IsInteger(s[i - 1]) && i < s.Length - 1 && IsInteger(s[i + 1]))
                 {
                     time = (s[i - 2].ToString() + s[i - 1].ToString() + s[i].ToString()
-                            + s[i + 1].ToString() + s[i + 2].ToString()).TrimStart().TrimEnd();
+                            + s[i + 1].ToString() + s[i + 2].ToString()).Trim();
                     break;
                 }
             }
-            return time.TrimStart('[').TrimEnd(']').TrimStart('(').TrimStart(')');
+            return time.TrimStart('[').TrimEnd(']').TrimStart('(').TrimEnd(')');
         }
 
         public static List<string> RemoveTrackNumbers(List<string> list)
@@ -74,12 +75,10 @@ namespace Audio_Master
             return list;
         }
 
-        public static bool IsNumber(char s)
+        public static bool IsInteger(char s)
         {
             string[] numbers = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "0" };
-            if (numbers.Contains(s.ToString()))
-                return true;
-            return false;
+            return numbers.Contains(s.ToString());
         }
 
         public static List<string> RemoveDuplicateCharacters(List<string> list)
@@ -129,7 +128,7 @@ namespace Audio_Master
             return list;
         }
 
-        string ToUpper(string name)
+        private string ToUpperCaseWords(string name)
         {
             string s = "";
             char[] chars = name.ToCharArray();

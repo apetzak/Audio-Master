@@ -1,30 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using YoutubeExplode;
 using YoutubeExplode.Models;
-using YoutubeExplode.Models.MediaStreams;
-using System.Linq;
-using System.IO;
 
 namespace Audio_Master
 {
     public partial class frmMain : Form
     {
-        public GridUtils gridUtils;
-        public List<Song> _songs = new List<Song>();
-        public Downloader _downloader = new Downloader();
-        public Scraper _scraper;
-        //InterceptKeys _interceptKeys = new InterceptKeys();
-        public string _pasted = "";
-        public int _selectedRow = -1;
-        public bool _downloading = false;
-        List<Color> _colors = new List<Color>();
-        Dictionary<string, string> _startingTimes = new Dictionary<string, string>();
-        public Dictionary<string, string> _lyrics = new Dictionary<string, string>();
-        public bool _loaded = false;
-
         enum Status
         {
             New,
@@ -32,6 +17,17 @@ namespace Audio_Master
             Downloading,
             Downloaded
         }
+
+        public List<Song> Songs = new List<Song>();
+        private Downloader _downloader = new Downloader();
+        private Scraper _scraper;
+        //private string _pasted = "";
+        private int _selectedRow = -1;
+        private bool _downloading = false;
+        private List<Color> _colors = new List<Color>();
+        private Dictionary<string, string> _startingTimes = new Dictionary<string, string>();
+        public Dictionary<string, string> Lyrics = new Dictionary<string, string>();
+        public bool Loaded = false;
 
         private readonly YoutubeClient client = new YoutubeClient();
 
@@ -60,7 +56,7 @@ namespace Audio_Master
             LoadColors();
             RefreshHeaders();
             _scraper = new Scraper(this);
-            _loaded = true;
+            Loaded = true;
 
             #region tests
 
@@ -84,7 +80,7 @@ namespace Audio_Master
 
         private void Column_Checked(object sender, EventArgs e)
         {
-            if (!_loaded)
+            if (!Loaded)
                 return;
             ToolStripMenuItem tsmi = (sender as ToolStripMenuItem);
             string col = "c" + tsmi.Name.Replace("tsmiCol", "");
@@ -93,7 +89,7 @@ namespace Audio_Master
 
         private void Header_Checked(object sender, EventArgs e)
         {
-            if (!_loaded)
+            if (!Loaded)
                 return;
             RefreshHeaders();
         }
@@ -128,7 +124,7 @@ namespace Audio_Master
 
         private void Setting_Checked(object sender, EventArgs e)
         {
-            if (!_loaded)
+            if (!Loaded)
                 return;
 
             ToolStripMenuItem tsmi = sender as ToolStripMenuItem;
@@ -217,7 +213,7 @@ namespace Audio_Master
 
         private void UpdateStatusColors(string status, Color color)
         {
-            foreach (Song s in _songs)
+            foreach (Song s in Songs)
                 dataGrid.Rows[s.RowIndex].DefaultCellStyle.BackColor = color;
         }
 
@@ -316,10 +312,10 @@ namespace Audio_Master
                 RowIndex = dataGrid.Rows.Count
             };
 
-            if (_songs.Where(o => o.Name == s.Name && o.Album == s.Album).ToList().Count != 0)
+            if (Songs.Where(o => o.Name == s.Name && o.Album == s.Album).ToList().Count != 0)
                 return;
 
-            _songs.Add(s);
+            Songs.Add(s);
 
             if (trackNum == 0)
                 dataGrid.Rows.Add(null, s.Name, s.Artist, s.Album, s.Year, s.Grouping, s.Genre, s.Time, s.Lyrics, s.ID, s.StartTime, s.Composer, "", s.Image, s.DiscNumber);
@@ -343,7 +339,7 @@ namespace Audio_Master
 
         public async void DownloadSongs()
         {
-            var songsToQueue = _songs.Where(s => s.Status == "New").ToList();
+            var songsToQueue = Songs.Where(s => s.Status == "New").ToList();
             if (songsToQueue.Count == 0)
                 return;
 
@@ -354,18 +350,18 @@ namespace Audio_Master
                 return;
 
             _downloading = true;
-            while (_songs.Where(s => s.Status == "Queued").ToList().Count > 0) // download all songs in queue
+            while (Songs.Where(s => s.Status == "Queued").ToList().Count > 0) // download all songs in queue
             {
-                Song s = _songs.OrderBy(_s => _s.RowIndex).Where(_s => _s.Status == "Queued").ToList()[0];
+                Song s = Songs.OrderBy(_s => _s.RowIndex).Where(_s => _s.Status == "Queued").ToList()[0];
 
-                if (_songs.Where(_s => _s.ID == s.ID).ToList().Count > 1)
+                if (Songs.Where(_s => _s.ID == s.ID).ToList().Count > 1)
                 {
-                    foreach (Song _s in _songs.Where(_s => _s.ID == s.ID))
+                    foreach (Song _s in Songs.Where(_s => _s.ID == s.ID))
                         SetStatus(_s, "Downloading", tsmiColorStatusDownloading.BackColor);
 
-                    await _downloader.Download(null, _songs.Where(_s => _s.ID == s.ID).ToList());
+                    await _downloader.Download(null, Songs.Where(_s => _s.ID == s.ID).ToList());
 
-                    foreach (Song _s in _songs.Where(_s => _s.ID == s.ID))
+                    foreach (Song _s in Songs.Where(_s => _s.ID == s.ID))
                         SetStatus(_s, "Downloaded", tsmiColorStatusDownloaded.BackColor);
                 }
                 else
@@ -412,7 +408,7 @@ namespace Audio_Master
                 string lyrics = Clipboard.GetText();
                 dataGrid.Rows[e.RowIndex].Cells[8].ToolTipText = lyrics;
                 dataGrid.Rows[e.RowIndex].Cells[8].Value = !String.IsNullOrEmpty(lyrics);
-                _songs[e.RowIndex].Lyrics = lyrics;
+                Songs[e.RowIndex].Lyrics = lyrics;
             }
         }
 
@@ -426,26 +422,26 @@ namespace Audio_Master
             string val = row.Cells[col].Value.ToString();
 
             if (col == 0)
-                _songs[row.Index].TrackNumber = Convert.ToInt32(val);
+                Songs[row.Index].TrackNumber = Convert.ToInt32(val);
             else if (col == 1)
-                _songs[row.Index].Name = val;
+                Songs[row.Index].Name = val;
             else if (col == 2)
-                _songs[row.Index].Artist = val;
+                Songs[row.Index].Artist = val;
             else if (col == 3)
-                _songs[row.Index].Album = val;
+                Songs[row.Index].Album = val;
             else if (col == 4)
-                _songs[row.Index].Year = val;
+                Songs[row.Index].Year = val;
             else if (col == 5)
-                _songs[row.Index].Grouping = val;
+                Songs[row.Index].Grouping = val;
             else if (col == 6)
-                _songs[row.Index].Genre = val;
+                Songs[row.Index].Genre = val;
         }
 
         private void dataGrid_RowCountChanged(object sender, EventArgs e)
         {
             foreach (DataGridViewRow row in dataGrid.Rows)
             {
-                foreach (Song s in _songs.Where(_s => _s.Name == row.Cells["cName"].Value.ToString()))
+                foreach (Song s in Songs.Where(_s => _s.Name == row.Cells["cName"].Value.ToString()))
                     s.RowIndex = row.Index;
             }
         }
@@ -465,7 +461,7 @@ namespace Audio_Master
             if (dataGrid.SelectedRows.Count == 1)
             {
                 AddMenuItem(cm, "Split");
-                if (_startingTimes.Count == 0 || _songs[_selectedRow].StartTime != null)
+                if (_startingTimes.Count == 0 || Songs[_selectedRow].StartTime != null)
                     cm.MenuItems[2].Enabled = false;
 
                 // disable if row is single song
@@ -487,7 +483,7 @@ namespace Audio_Master
             foreach (int i in GetSelectedRows())
             {
                 dataGrid.Rows.RemoveAt(i);
-                _songs.RemoveAt(i);
+                Songs.RemoveAt(i);
             }
         }
 
@@ -516,7 +512,7 @@ namespace Audio_Master
         {
             DataGridViewRow row = dataGrid.SelectedRows[0];
             string id = row.Cells["cID"].Value.ToString();
-            Song album = _songs[row.Index];
+            Song album = Songs[row.Index];
             int albumSeconds = album.Time.Seconds;
 
             int i = 1;
@@ -538,11 +534,11 @@ namespace Audio_Master
                     StartTime = pair.Value
                 };
                 s.StartSeconds = Convert.ToInt32(s.StartTime.Split(':')[1]) + Convert.ToInt32(s.StartTime.Split(':')[0]) * 60;
-                _songs.Add(s);
+                Songs.Add(s);
                 dataGrid.Rows.Add(s.TrackNumber, s.Name, s.Artist, s.Album, s.Year, s.Grouping, s.Genre, s.Time, s.Lyrics, s.ID, s.StartTime); 
             }
 
-            _songs.RemoveAt(row.Index);
+            Songs.RemoveAt(row.Index);
             dataGrid.Rows.RemoveAt(row.Index);
 
             SetStartingTimes(id, album.Time.TotalSeconds);
@@ -552,11 +548,11 @@ namespace Audio_Master
 
         private void SetStartingTimes(string id, double totalSeconds)
         {
-            foreach (Song s in _songs.Where(_s => _s.ID == id))
+            foreach (Song s in Songs.Where(_s => _s.ID == id))
             {
                 int seconds;
-                if (_songs.IndexOf(s) != _songs.Count - 1)
-                    seconds = _songs[_songs.IndexOf(s) + 1].StartSeconds - s.StartSeconds;
+                if (Songs.IndexOf(s) != Songs.Count - 1)
+                    seconds = Songs[Songs.IndexOf(s) + 1].StartSeconds - s.StartSeconds;
                 else
                     seconds = Convert.ToInt32(totalSeconds) - s.StartSeconds;
                 int minutes = seconds / 60;
@@ -597,9 +593,9 @@ namespace Audio_Master
 
         public void AddLyrics()
         {
-            foreach (KeyValuePair<string, string> pair in _lyrics)
+            foreach (KeyValuePair<string, string> pair in Lyrics)
             {
-                foreach (Song s in _songs.Where(_s => _s.Name.ToLower() == pair.Key.ToLower()))
+                foreach (Song s in Songs.Where(_s => _s.Name.ToLower() == pair.Key.ToLower()))
                 {
                     s.Lyrics = pair.Value;
                     dataGrid.Rows[s.RowIndex].Cells["cLyrics"].ToolTipText = pair.Value;
@@ -613,7 +609,7 @@ namespace Audio_Master
             //var v = new InterceptKeys();
         }
 
-        private void MouseHover(object sender, EventArgs e)
+        private void btn_MouseHover(object sender, EventArgs e)
         {
             if (tsmiShowTooltips.Checked)
                 ToolTipController.Show(toolTip, sender, menuStrip);

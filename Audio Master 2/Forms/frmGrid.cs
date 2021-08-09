@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
-using System.Windows.Forms;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Audio_Master
 {
@@ -25,7 +25,7 @@ namespace Audio_Master
 
             foreach (Album a in Albums)
             {
-                dgvMain.Rows.Add(a.Artist, a.Name, a.songs.Count, a.NullCount.ToString(), a.NACount.ToString());
+                dgvMain.Rows.Add(a.Artist, a.Name, a.SongTitles.Count, a.NullCount.ToString(), a.NACount.ToString());
 
                 if (a.NullCount > 0)
                     dgvMain.Rows[dgvMain.Rows.Count - 2].DefaultCellStyle.BackColor = Color.LightGray;

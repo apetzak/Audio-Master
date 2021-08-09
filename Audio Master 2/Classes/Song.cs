@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Kaztep.Extensions;
+using System;
 using System.Drawing;
 using YoutubeExplode.Models;
-using System.Collections.Generic;
 
 namespace Audio_Master
 {
@@ -41,9 +41,9 @@ namespace Audio_Master
 
         public Song(string name, string lyrics, int trackNumber, string time)
         {
-            //Name = name;
-            //Lyrics = lyrics;
-            //TrackNumber = trackNumber;
+            Name = name;
+            Lyrics = lyrics;
+            TrackNumber = trackNumber;
             //Time = time;
         }
 
@@ -60,7 +60,7 @@ namespace Audio_Master
         {
             if (s == null || !s.Contains(":"))
                 return;
-            s = s.Replace(" ", "");
+            s = s.RemoveAll(" ");
             StartTime = s;
 
             if (StartTime == "00:00")
@@ -69,7 +69,7 @@ namespace Audio_Master
             int minutes = 0;
             int seconds = 0;
 
-            if (s.ToString().Length > 5)
+            if (s.Length > 5)
             {
                 var array = StartTime.Split(':');
                 int hours = Convert.ToInt32(array[0]);

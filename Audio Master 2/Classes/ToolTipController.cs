@@ -1,13 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Windows.Forms;
-using YoutubeExplode;
-using YoutubeExplode.Models;
-using YoutubeExplode.Models.MediaStreams;
-using System.Drawing;
-using System.Linq;
-using iTunesLib;
 
 namespace Audio_Master
 {

@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
 
 namespace Audio_Master
 {
     public class Album
     {
         public List<Song> Songs = new List<Song>();
+        public List<string> SongTitles = new List<string>();
         public string Name;
         public string Artist;
         public string Genre;
@@ -19,16 +20,15 @@ namespace Audio_Master
         public string Time;
         public bool NeedsSplit = false;
         public Image Image;
-        public DataGridView grid;
-        public List<string> songs = new List<string>();
         public string Directory;
         public int NullCount;
         public int NACount;
-        public string URL;    
+        public string URL;
+        private DataGridView _grid;
 
         public Album(DataGridView dgv = null)
         {
-            grid = dgv;
+            _grid = dgv;
         }
 
         public Album(string directory, string artist, string name)
@@ -38,19 +38,19 @@ namespace Audio_Master
             Name = name;
             URL = String.Format("https://www.metal-archives.com/albums/{0}/{1}", Artist, Name);
 
-            DirectoryInfo d = new DirectoryInfo(Directory);
+            var d = new DirectoryInfo(Directory);
             FileInfo[] Files = d.GetFiles();
 
             foreach (FileInfo file in Files)
             {
                 if (file.Name.EndsWith(".mp3") || file.Name.EndsWith(".m4a"))
-                    songs.Add(file.Name);
+                    SongTitles.Add(file.Name);
             }
 
-            if (songs.Count == 0)
+            if (SongTitles.Count == 0)
                 return;
 
-            foreach (string s in songs)
+            foreach (string s in SongTitles)
             {
                 var f = TagLib.File.Create(String.Format(@"{0}\{1}", Directory, s));
 
@@ -65,8 +65,8 @@ namespace Audio_Master
         {
             Songs.Add(s);
             bool hasLyrics = s.Lyrics.Equals("NA") ? false : true;
-            grid.Rows.Add(s.TrackNumber, s.Name, s.Time, hasLyrics, s.ID, s.StartTime);
-            grid.Rows[s.TrackNumber - 1].Cells[3].ToolTipText = s.Lyrics;
+            _grid.Rows.Add(s.TrackNumber, s.Name, s.Time, hasLyrics, s.ID, s.StartTime);
+            _grid.Rows[s.TrackNumber - 1].Cells[3].ToolTipText = s.Lyrics;
         }
 
         public void Insert(Song s, int index)
@@ -90,7 +90,7 @@ namespace Audio_Master
 
             foreach (Song _s in Songs)
             {
-                foreach (DataGridViewRow dgvr in grid.Rows)
+                foreach (DataGridViewRow dgvr in _grid.Rows)
                 {
                     if (dgvr.Cells[1].Value.ToString() == _s.Name)
                     {
@@ -100,15 +100,15 @@ namespace Audio_Master
                 }
             }
 
-            grid.Rows[index].DefaultCellStyle.BackColor = SystemColors.Window;
-            grid.Sort(this.grid.Columns["cTrackNumber"], ListSortDirection.Ascending);         
+            _grid.Rows[index].DefaultCellStyle.BackColor = SystemColors.Window;
+            _grid.Sort(this._grid.Columns["cTrackNumber"], ListSortDirection.Ascending);         
 
-            foreach (DataGridViewRow dgvr in grid.Rows)
+            foreach (DataGridViewRow dgvr in _grid.Rows)
             {
                 if (dgvr.DefaultCellStyle.BackColor == Color.Red)
                 {
-                    grid.Rows.Remove(dgvr);
-                    grid.Rows.Add(dgvr);
+                    _grid.Rows.Remove(dgvr);
+                    _grid.Rows.Add(dgvr);
                 }
             }
         }
@@ -141,7 +141,7 @@ namespace Audio_Master
                     seconds -= 60;
                 }
                 //s.Time = String.Format("{0}:{1}", minutes >= 10 ? minutes.ToString() : "0" + minutes.ToString(), seconds >= 10 ? seconds.ToString() : "0" + seconds.ToString());
-                grid.Rows[i++].Cells[2].Value = s.Time;
+                _grid.Rows[i++].Cells[2].Value = s.Time;
             }
         }
     }

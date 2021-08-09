@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 
 namespace Audio_Master
 {
@@ -13,9 +11,8 @@ namespace Audio_Master
         public static void Clean()
         {
             var dict = new Dictionary<string, string>();
-            string path = Settings.MusicPath;
 
-            string[] artists = Directory.GetDirectories(path);
+            string[] artists = Directory.GetDirectories(Settings.MusicPath);
             foreach (string ar in artists)
             {
                 string[] albums = Directory.GetDirectories(ar);

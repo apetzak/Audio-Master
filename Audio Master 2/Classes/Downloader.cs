@@ -1,27 +1,25 @@
-﻿using System;
+﻿using CliWrap;
+using iTunesLib;
+using NAudio.Wave;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.IO;
 using YoutubeExplode;
-using YoutubeExplode.Models;
 using YoutubeExplode.Models.MediaStreams;
-using System.Text.RegularExpressions;
-using CliWrap;
-using NAudio.Wave; 
-using iTunesLib;
-using System.Diagnostics;
-using System.Collections.Generic;
 
 namespace Audio_Master
 {
     public class Downloader
     {
-        private readonly YoutubeClient client = new YoutubeClient();
-        private readonly Cli FfmpegCli = new Cli("ffmpeg.exe");
-        private static readonly string TempDirectoryPath = Path.Combine(Directory.GetCurrentDirectory(), "Temp");
-        iTunesApp iTunes = new iTunesApp();
+        private static readonly string s_TempDirectoryPath = 
+            Path.Combine(Directory.GetCurrentDirectory(), "Temp");
+        private readonly YoutubeClient _client = new YoutubeClient();
+        private readonly Cli _ffmpegCli = new Cli("ffmpeg.exe");
+        private iTunesApp _iTunes = new iTunesApp();
 
         private MediaStreamInfo GetBestAudioStreamInfo(MediaStreamInfoSet set)
         {
@@ -32,20 +30,9 @@ namespace Audio_Master
             throw new Exception("No applicable media streams found for this video");
         }
 
-        public void CorrectGenre(Album a)
+        public string GetCreatePath(string pathStart, string pathEnd)
         {
-            //string path = String.Format(@"{0}{1}.mp3", a.Directory, a.Songs[0].Name);
-            //var f = TagLib.File.Create(path);
-
-            //if (f.Tag.Genres[0] != a.Genre)
-            //{
-
-            //}
-        }
-
-        public string GetPath(string pathStart, string pathEnd)
-        {
-            string path = String.Format(@"{0}{1}", pathStart, pathEnd);
+            string path = $"{pathStart.TrimEnd('/')}//{pathEnd.TrimStart('/')}";
             string[] dirs = Directory.GetDirectories(pathStart);
             if (!dirs.Contains(path))
                 Directory.CreateDirectory(path);
@@ -54,46 +41,49 @@ namespace Audio_Master
 
         public async Task Download(Song s = null, List<Song> songs = null)
         {
+            Song song = s == null ? songs[0] : s;
+
             string path = String.Empty;
-            string album = s == null ? songs[0].Album : s.Album;
-            string artist = s == null ? songs[0].Artist : s.Artist;
-            string id = s == null ? songs[0].ID : s.ID;
-            string name = s == null ? songs[0].Video.Title : s.Video.Title;
-            string cleanTitle = Path.GetInvalidFileNameChars().Aggregate(name, (current, c) => current.Replace(c.ToString(), String.Empty));
-            MediaStreamInfoSet set = await client.GetVideoMediaStreamInfosAsync(id);
+            string album = song.Album;
+            string artist = song.Artist;
+            string id = song.ID;
+            string name = song.Video.Title;
+            string cleanTitle = GetCleanTitle(name);
+
+            MediaStreamInfoSet set = await _client.GetVideoMediaStreamInfosAsync(id);
             MediaStreamInfo streamInfo = set.Audio.WithHighestBitrate();
 
             // download to temp file
-            Directory.CreateDirectory(TempDirectoryPath);
+            Directory.CreateDirectory(s_TempDirectoryPath);
             string streamFileExt = streamInfo.Container.GetFileExtension();
-            string streamFilePath = Path.Combine(TempDirectoryPath, $"{Guid.NewGuid()}.{streamFileExt}");
-            await client.DownloadMediaStreamAsync(streamInfo, streamFilePath);
+            string streamFilePath = Path.Combine(s_TempDirectoryPath, $"{Guid.NewGuid()}.{streamFileExt}");
+            await _client.DownloadMediaStreamAsync(streamInfo, streamFilePath);
 
-            // create directories          
+            // Create directories          
             if (String.IsNullOrEmpty(artist))
             {
-                path = GetPath(Settings.MusicPath, "Unknown Artist");
+                path = GetCreatePath(Settings.MusicPath, "Unknown Artist");
                 if (String.IsNullOrEmpty(album))
-                    path = GetPath(path, "Unknown Album");
+                    path = GetCreatePath(path, "Unknown Album");
             }
             else
             {
-                path = GetPath(Settings.MusicPath, artist);
+                path = GetCreatePath(Settings.MusicPath, artist);
                 if (!String.IsNullOrEmpty(album))
-                    path = GetPath(path, album);
+                    path = GetCreatePath(path, album);
             }
 
-            string mp3Path = String.Format(@"{0}\{1}.mp3", path, cleanTitle);
+            string mp3Path = $"{path}\\{cleanTitle}.mp3";
 
-            // convert to mp3
+            // Convert to mp3
             try
             {
-                FfmpegCli.SetArguments($"-i \"{streamFilePath}\" -q:a 0 -map a \"{mp3Path}\" -y");
-                await FfmpegCli.ExecuteAsync();
+                _ffmpegCli.SetArguments($"-i \"{streamFilePath}\" -q:a 0 -map a \"{mp3Path}\" -y");
+                await _ffmpegCli.ExecuteAsync();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.ToString());
             }       
 
             // delete temp file
@@ -109,47 +99,72 @@ namespace Audio_Master
                 }
                 else
                 {
-                    meta.Tag.Album = songs[0].Album;
+                    meta.Tag.Album = song.Album;
                     meta.Save();
                     Split(songs, path, mp3Path);
                 }
             }           
         }
 
+        private string GetCleanTitle(string name)
+        {
+            return Path.GetInvalidFileNameChars()
+                .Aggregate(name, (current, c) => current.Replace(c.ToString(), String.Empty));
+        }
+
+        private TagLib.IPicture[] GetTagLibPicture(Image image)
+        {
+            var bytes = (byte[])new ImageConverter().ConvertTo(image, typeof(byte[]));
+            return new TagLib.IPicture[] { new TagLib.Picture(new TagLib.ByteVector(bytes)) };
+        }
+
         public void SaveMp3(TagLib.File meta, Song s, bool needSplit = false)
         {
-            //clear sorting
+            // Set tags
 
             meta.Tag.Title = s.Name;
+
             if (!String.IsNullOrEmpty(s.Artist))
                 meta.Tag.Performers = new string[] { s.Artist };
+
             if (!String.IsNullOrEmpty(s.Album))
                 meta.Tag.Album = s.Album;
+
             if (!String.IsNullOrEmpty(s.Year))
                 meta.Tag.Year = Convert.ToUInt32(s.Year);
+
             if (!String.IsNullOrEmpty(s.Grouping))
                 meta.Tag.Grouping = s.Grouping;
+
             if (!String.IsNullOrEmpty(s.Genre))
-                meta.Tag.Genres = new string[] { s.Genre };            
+                meta.Tag.Genres = new string[] { s.Genre };  
+            
             if (!String.IsNullOrEmpty(s.Lyrics))
                 meta.Tag.Lyrics = s.Lyrics;
+
             if (s.TrackNumber != 0)
                 meta.Tag.Track = Convert.ToUInt32(s.TrackNumber);
-            if (s.Image != null)
-                meta.Tag.Pictures = new TagLib.IPicture[] { new TagLib.Picture(new TagLib.ByteVector((byte[])new ImageConverter().ConvertTo(s.Image, typeof(byte[])))) };
-            meta.Save();
-            iTunes.LibraryPlaylist.AddFile(@s.Path);
 
+            if (s.Image != null)
+                meta.Tag.Pictures = GetTagLibPicture(s.Image);
+
+            meta.Save();
+
+            _iTunes.LibraryPlaylist.AddFile(@s.Path);
+
+            // Sometimes split songs will have an incorrect duration in iTunes.
+            // They need to be converted in iTunes to fix it.
             if (needSplit)
             {
-                var iTunesSeconds = iTunes.LibraryPlaylist.Tracks[iTunes.LibraryPlaylist.Tracks.Count].Duration;
+                var index = _iTunes.LibraryPlaylist.Tracks.Count;
+                var iTunesSeconds = _iTunes.LibraryPlaylist.Tracks[index].Duration;
 
-                while (iTunes.ConvertOperationStatus != null) { }
+                while (_iTunes.ConvertOperationStatus != null) { }
 
                 if (iTunesSeconds != s.Time.TotalSeconds)
                 {
-                    iTunes.LibraryPlaylist.Tracks[iTunes.LibraryPlaylist.Tracks.Count].Delete();
-                    iTunes.ConvertFile(@s.Path);                   
+                    _iTunes.LibraryPlaylist.Tracks[index].Delete();
+                    _iTunes.ConvertFile(@s.Path);                   
                     s.Converted = true;
                 }
             }
@@ -175,12 +190,17 @@ namespace Audio_Master
                 //double fps = totalFrames / ts.TotalSeconds;
                 #endregion
 
+                // Get the amount of frames in the file per second of the track
+
                 double framesPerSecond = 0;
                 using (Mp3FileReader reader = new Mp3FileReader(@mp3Path))
                 {
-                    Mp3Frame mp3Frame = reader.ReadNextFrame();
-                    framesPerSecond = Convert.ToDouble(mp3Frame.SampleRate) / Convert.ToDouble(mp3Frame.SampleCount);
+                    Mp3Frame frame = reader.ReadNextFrame();
+                    framesPerSecond = 
+                        Convert.ToDouble(frame.SampleRate) / Convert.ToDouble(frame.SampleCount);
                 }
+
+                // Calculate starting frames for each track
 
                 foreach (Song s in songs)
                     s.StartFrames = s.StartSeconds * framesPerSecond;
@@ -189,19 +209,30 @@ namespace Audio_Master
                 {
                     using (Mp3FileReader reader = new Mp3FileReader(@mp3Path))
                     {
-                        string track = songs[i].TrackNumber > 9 ? songs[i].TrackNumber.ToString() : "0" + songs[i].TrackNumber.ToString();
-                        string cleanTitle = Path.GetInvalidFileNameChars().Aggregate(songs[i].Name, (current, c) => current.Replace(c.ToString(), String.Empty));
-                        songs[i].Path = String.Format("{0}\\{1} {2}.mp3", folderPath, track, cleanTitle);
+                        string trackNum = songs[i].TrackNumber.ToString();
+                        if (trackNum.Length == 1)
+                            trackNum = "0" + trackNum;
+
+                        string cleanTitle = GetCleanTitle(songs[i].Name);
+
+                        songs[i].Path = $"{folderPath}\\{trackNum} {cleanTitle}.mp3";
+
                         int count = 0;
                         Mp3Frame mp3Frame = reader.ReadNextFrame();
-                        FileStream fs = new FileStream(@songs[i].Path, FileMode.Create, FileAccess.Write);
+                        var fs = new FileStream(@songs[i].Path, FileMode.Create, FileAccess.Write);
 
                         while (mp3Frame != null)
                         {
-                            if (songs[i].StartFrames <= count && i == songs.Count - 1)
-                                fs.Write(mp3Frame.RawData, 0, mp3Frame.RawData.Length);
+                            // TODO Test refactor
 
-                            else if (songs[i].StartFrames <= count && songs[i + 1].StartFrames > count)
+                            //if (songs[i].StartFrames <= count && i == songs.Count - 1)
+                            //    fs.Write(mp3Frame.RawData, 0, mp3Frame.RawData.Length);
+
+                            //else if (songs[i].StartFrames <= count && songs[i + 1].StartFrames > count)
+                            //    fs.Write(mp3Frame.RawData, 0, mp3Frame.RawData.Length);
+
+                            if (songs[i].StartFrames <= count && 
+                                (i == songs.Count - 1 || songs[i + 1].StartFrames > count))
                                 fs.Write(mp3Frame.RawData, 0, mp3Frame.RawData.Length);
 
                             mp3Frame = reader.ReadNextFrame();
@@ -212,24 +243,22 @@ namespace Audio_Master
                     }
                 }
 
-                int n = 0;
                 foreach (Song s in songs)
                 {
-                    n++;
                     using (var meta = TagLib.File.Create(@s.Path))
-                    {
                         SaveMp3(meta, s, true);
-                    }
-                    while (iTunes.ConvertOperationStatus != null) { }
-                    if (s.Converted == true)
+
+                    while (_iTunes.ConvertOperationStatus != null) { }
+
+                    if (s.Converted)
                         File.Delete(@s.Path);
                 }
 
                 File.Delete(@mp3Path);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                MessageBox.Show(e.ToString());
+                MessageBox.Show(ex.ToString());
             }
         }
     }

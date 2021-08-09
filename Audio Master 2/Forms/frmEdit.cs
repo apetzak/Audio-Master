@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.IO;
-using System.Text;
-using System;
 
 namespace Audio_Master
 {
@@ -26,7 +23,7 @@ namespace Audio_Master
 
         public void SetFieldValues()
         {
-            Song s = _frmMain._songs[_frmMain.GetSelectedRows()[0]];
+            Song s = _frmMain.Songs[_frmMain.GetSelectedRows()[0]];
             int selected = _frmMain.GetSelectedRows().Count;
             if (_frmMain.GetSelectedRows().Count == 1)
             {
@@ -51,21 +48,21 @@ namespace Audio_Master
 
             foreach (int i in _frmMain.GetSelectedRows())
             {
-                if (_frmMain._songs[i].Artist != s.Artist)
+                if (_frmMain.Songs[i].Artist != s.Artist)
                     sameArtist = false;
-                if (_frmMain._songs[i].Album != s.Album)
+                if (_frmMain.Songs[i].Album != s.Album)
                     sameAlbum = false;
-                if (_frmMain._songs[i].Year != s.Year)
+                if (_frmMain.Songs[i].Year != s.Year)
                     sameYear = false;
-                if (_frmMain._songs[i].Grouping != s.Grouping)
+                if (_frmMain.Songs[i].Grouping != s.Grouping)
                     sameGrouping = false;
-                if (_frmMain._songs[i].Genre != s.Genre)
+                if (_frmMain.Songs[i].Genre != s.Genre)
                     sameGenre = false;
-                if (_frmMain._songs[i].Image != s.Image)
+                if (_frmMain.Songs[i].Image != s.Image)
                     sameImage = false;
-                if (_frmMain._songs[i].Composer != s.Composer)
+                if (_frmMain.Songs[i].Composer != s.Composer)
                     sameComposer = false;
-                if (_frmMain._songs[i].DiscNumber != s.DiscNumber)
+                if (_frmMain.Songs[i].DiscNumber != s.DiscNumber)
                     sameDiscNumber = false;
             }
 
@@ -95,19 +92,19 @@ namespace Audio_Master
                 _frmMain.dataGrid.Rows[i].Cells[5].Value = txtGrouping.Text;
                 _frmMain.dataGrid.Rows[i].Cells[6].Value = txtGenre.Text;
 
-                _frmMain._songs[i].Artist = txtArtist.Text;
-                _frmMain._songs[i].Album = txtAlbum.Text;
-                _frmMain._songs[i].Year = txtYear.Text;
-                _frmMain._songs[i].Grouping = txtGrouping.Text;
-                _frmMain._songs[i].Genre = txtGenre.Text;
-                _frmMain._songs[i].Image = pbCoverArt.Image;
-                _frmMain._songs[i].Composer = txtComposer.Text;
+                _frmMain.Songs[i].Artist = txtArtist.Text;
+                _frmMain.Songs[i].Album = txtAlbum.Text;
+                _frmMain.Songs[i].Year = txtYear.Text;
+                _frmMain.Songs[i].Grouping = txtGrouping.Text;
+                _frmMain.Songs[i].Genre = txtGenre.Text;
+                _frmMain.Songs[i].Image = pbCoverArt.Image;
+                _frmMain.Songs[i].Composer = txtComposer.Text;
 
                 if (!String.IsNullOrEmpty(rtbLyrics.Text))
                 {
                     _frmMain.dataGrid.Rows[i].Cells[8].Value = true;
                     _frmMain.dataGrid.Rows[i].Cells[8].ToolTipText = rtbLyrics.Text;
-                    _frmMain._songs[i].Lyrics = rtbLyrics.Text;
+                    _frmMain.Songs[i].Lyrics = rtbLyrics.Text;
                 }
             }
 

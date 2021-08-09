@@ -1,11 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
-using System.Xml;
-using System.Windows.Forms;
 using System.IO;
 using System.Windows.Forms;
 
@@ -18,7 +13,13 @@ namespace Audio_Master
             return Path.Combine(Directory.GetCurrentDirectory(), file);
         }
 
-        public static void SaveForm(ToolStripMenuItem tsmiSettings, int width, int height, FormWindowState state, string file = "Settings_Main", bool reset = false)
+        public static void SaveForm(
+            ToolStripMenuItem tsmiSettings, 
+            int width, 
+            int height, 
+            FormWindowState state, 
+            string file = "Settings_Main", 
+            bool reset = false)
         {
             var values = new Dictionary<string, string>();
             foreach (ToolStripMenuItem tsmi in tsmiSettings.DropDownItems)
@@ -55,6 +56,9 @@ namespace Audio_Master
         public static void LoadForm(ToolStripMenuItem tsmiSettings, Form form, string file)
         {
             var values = LoadFile(file);
+            if (values.Count == 0)
+                return;
+
             form.Width = Convert.ToInt32(values["Width"]);
             form.Height = Convert.ToInt32(values["Height"]);
             foreach (ToolStripMenuItem tsmi in tsmiSettings.DropDownItems)
@@ -95,6 +99,9 @@ namespace Audio_Master
         public static void LoadColumns(DataGridView dgv, ToolStripMenuItem tsmiColumns)
         {
             var values = LoadFile("Settings_Columns");
+            if (values.Count == 0)
+                return;
+
             foreach (ToolStripMenuItem tsmi in tsmiColumns.DropDownItems)
             {
                 string col = "c" + tsmi.Name.Replace("tsmiCol", "");
@@ -114,10 +121,11 @@ namespace Audio_Master
 
         }
 
-        public static void SaveFile(Dictionary<string, string> values, string path)
+        public static void SaveFile(Dictionary<string, string> values, string path)            
         {
-            //if (!File.Exists(path))
-            //    File.Create(path);
+            if (!File.Exists(path))
+                File.Create(path);
+
             StreamWriter sw = new StreamWriter(path);
             foreach (KeyValuePair <string, string> pair in values)
                 sw.WriteLine(String.Format("{0} {1}", pair.Key, pair.Value));
@@ -127,6 +135,10 @@ namespace Audio_Master
         public static Dictionary<string, string> LoadFile(string file)
         {
             var values = new Dictionary<string, string>();
+
+            if (!File.Exists(GetPath(file)))
+                return values;
+
             using (StreamReader sr = new StreamReader(GetPath(file)))
             {
                 string line;
@@ -138,6 +150,9 @@ namespace Audio_Master
 
         public static string LoadValue(string setting, string file = "Settings_Main")
         {
+            if (!File.Exists(GetPath(file)))
+                return String.Empty;
+
             using (StreamReader sr = new StreamReader(GetPath(file)))
             {
                 string line;
@@ -152,6 +167,8 @@ namespace Audio_Master
 
         public static Color LoadColor(string setting, string file = "Settings_Main")
         {
+            if (!File.Exists(GetPath(file)))
+                return Color.White;
             return Color.FromName(LoadValue(setting, file));
         }
 

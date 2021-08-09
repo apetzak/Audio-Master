@@ -400,7 +400,7 @@
             this.pbCoverArt.TabIndex = 25;
             this.pbCoverArt.TabStop = false;
             this.pbCoverArt.Click += new System.EventHandler(this.pbCoverArt_Click);
-            this.pbCoverArt.MouseHover += new System.EventHandler(this.MouseHover);
+            this.pbCoverArt.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // btnClear
             // 
@@ -416,7 +416,7 @@
             this.btnClear.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             this.btnClear.UseVisualStyleBackColor = true;
             this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
-            this.btnClear.MouseHover += new System.EventHandler(this.MouseHover);
+            this.btnClear.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // btnDownload
             // 
@@ -429,7 +429,7 @@
             this.btnDownload.Text = "Download";
             this.btnDownload.UseVisualStyleBackColor = true;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            this.btnDownload.MouseHover += new System.EventHandler(this.MouseHover);
+            this.btnDownload.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // txtGrouping
             // 
@@ -520,7 +520,7 @@
             this.tsmiSettings.Name = "tsmiSettings";
             this.tsmiSettings.Size = new System.Drawing.Size(61, 20);
             this.tsmiSettings.Text = "Settings";
-            this.tsmiSettings.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiSettings.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiMusicPath
             // 
@@ -529,7 +529,7 @@
             this.tsmiMusicPath.Name = "tsmiMusicPath";
             this.tsmiMusicPath.Size = new System.Drawing.Size(216, 22);
             this.tsmiMusicPath.Text = "Music Path";
-            this.tsmiMusicPath.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiMusicPath.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tstbMusicPath
             // 
@@ -550,7 +550,7 @@
             this.tsmiColors.Name = "tsmiColors";
             this.tsmiColors.Size = new System.Drawing.Size(216, 22);
             this.tsmiColors.Text = "Colors";
-            this.tsmiColors.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiColors.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tscbColors
             // 
@@ -628,7 +628,7 @@
             this.tsmiColumns.Name = "tsmiColumns";
             this.tsmiColumns.Size = new System.Drawing.Size(216, 22);
             this.tsmiColumns.Text = "Columns";
-            this.tsmiColumns.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiColumns.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiColAlbum
             // 
@@ -784,7 +784,7 @@
             this.tsmiHeaderFields.Name = "tsmiHeaderFields";
             this.tsmiHeaderFields.Size = new System.Drawing.Size(216, 22);
             this.tsmiHeaderFields.Text = "Header Fields";
-            this.tsmiHeaderFields.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiHeaderFields.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiHeaderAlbum
             // 
@@ -877,7 +877,7 @@
             this.tsmiBitrate.Name = "tsmiBitrate";
             this.tsmiBitrate.Size = new System.Drawing.Size(216, 22);
             this.tsmiBitrate.Text = "Bitrate";
-            this.tsmiBitrate.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiBitrate.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiBitrateMax
             // 
@@ -898,7 +898,7 @@
             this.tsmiAutoRemoveDownloaded.Size = new System.Drawing.Size(216, 22);
             this.tsmiAutoRemoveDownloaded.Text = "Auto Remove Downloaded";
             this.tsmiAutoRemoveDownloaded.CheckedChanged += new System.EventHandler(this.Setting_Checked);
-            this.tsmiAutoRemoveDownloaded.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiAutoRemoveDownloaded.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiCreateArtistFolder
             // 
@@ -909,7 +909,7 @@
             this.tsmiCreateArtistFolder.Size = new System.Drawing.Size(216, 22);
             this.tsmiCreateArtistFolder.Text = "Create Artist Folder";
             this.tsmiCreateArtistFolder.CheckedChanged += new System.EventHandler(this.Setting_Checked);
-            this.tsmiCreateArtistFolder.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiCreateArtistFolder.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiCreateAlbumFolder
             // 
@@ -920,7 +920,7 @@
             this.tsmiCreateAlbumFolder.Size = new System.Drawing.Size(216, 22);
             this.tsmiCreateAlbumFolder.Text = "Create Album Folder";
             this.tsmiCreateAlbumFolder.CheckedChanged += new System.EventHandler(this.Setting_Checked);
-            this.tsmiCreateAlbumFolder.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiCreateAlbumFolder.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiClearSorting
             // 
@@ -949,7 +949,7 @@
             this.tsmiShowTooltips.Size = new System.Drawing.Size(216, 22);
             this.tsmiShowTooltips.Text = "Show Tooltips";
             this.tsmiShowTooltips.CheckedChanged += new System.EventHandler(this.Setting_Checked);
-            this.tsmiShowTooltips.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiShowTooltips.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiSendToiTunes
             // 
@@ -960,7 +960,7 @@
             this.tsmiSendToiTunes.Size = new System.Drawing.Size(216, 22);
             this.tsmiSendToiTunes.Text = "Send to iTunes";
             this.tsmiSendToiTunes.CheckedChanged += new System.EventHandler(this.Setting_Checked);
-            this.tsmiSendToiTunes.MouseHover += new System.EventHandler(this.MouseHover);
+            this.tsmiSendToiTunes.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // tsmiViewer
             // 
@@ -986,7 +986,7 @@
             this.btnAdd.Text = "Add";
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
-            this.btnAdd.MouseHover += new System.EventHandler(this.MouseHover);
+            this.btnAdd.MouseHover += new System.EventHandler(this.btn_MouseHover);
             // 
             // browser
             // 
