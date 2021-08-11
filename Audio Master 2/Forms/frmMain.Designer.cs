@@ -1121,25 +1121,25 @@
 
         #endregion
 
-        public System.Windows.Forms.TextBox txtArtist;
+        private System.Windows.Forms.TextBox txtArtist;
         private System.Windows.Forms.Label lblArtist;
         private System.Windows.Forms.Label lblAlbum;
-        public System.Windows.Forms.TextBox txtAlbum;
+        private System.Windows.Forms.TextBox txtAlbum;
         private System.Windows.Forms.Label lblGrouping;
         private System.Windows.Forms.Label lblYear;
-        public System.Windows.Forms.TextBox txtYear;
+        private System.Windows.Forms.TextBox txtYear;
         private System.Windows.Forms.Label lblGenre;
         private System.Windows.Forms.ComboBox txtGenre;
-        public System.Windows.Forms.DataGridView dataGrid;
-        public System.Windows.Forms.PictureBox pbCoverArt;
+        private System.Windows.Forms.DataGridView dataGrid;
+        private System.Windows.Forms.PictureBox pbCoverArt;
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.ComboBox txtGrouping;
         private System.Windows.Forms.Label lblPercentage;
         private System.Windows.Forms.Label lblTotalTime;
         private System.Windows.Forms.MenuStrip menuStrip;
         private System.Windows.Forms.ToolStripMenuItem tsmiSettings;
-        public System.Windows.Forms.Button btnAdd;
-        public System.Windows.Forms.WebBrowser browser;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.WebBrowser browser;
         private System.Windows.Forms.ToolStripMenuItem tsmiViewer;
         private System.Windows.Forms.Button btnClear;
         private System.Windows.Forms.ToolStripMenuItem tsmiColors;

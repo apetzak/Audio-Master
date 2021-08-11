@@ -8,6 +8,8 @@ namespace Audio_Master
 {
     static class Program
     {
+        public static frmMain MainForm;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -16,7 +18,8 @@ namespace Audio_Master
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+            MainForm = new frmMain();
+            Application.Run(MainForm);
         }
     }
 }

@@ -33,8 +33,8 @@ namespace Audio_Master
                 if (a.NullCount > 0)
                 {
                     CurrentIndex = 0;
-                    webBrowser1.Navigate(a.URL);
-                    txtURL.Text = a.URL;
+                    webBrowser.Navigate(a.Url);
+                    txtUrl.Text = a.Url;
                     _timer.Start();
                     break;
                 }
@@ -50,9 +50,11 @@ namespace Audio_Master
                 _timer.Stop();
                 _delay = 0;
 
-                foreach (HtmlElement el in webBrowser1.Document.GetElementsByTagName("a"))
+                foreach (HtmlElement el in GetElementsByTag("a"))
+                {
                     if (el.Id != null && el.Id.Contains("lyricsButton"))
                         el.InvokeMember("onclick");
+                }
 
                 btnNext.Enabled = true;
                 btnSave.Enabled = true;
@@ -61,7 +63,12 @@ namespace Audio_Master
 
         private void txtURL_Leave(object sender, EventArgs e)
         {
-            webBrowser1.Navigate(txtURL.Text);
+            webBrowser.Navigate(txtUrl.Text);
+        }
+
+        private HtmlElementCollection GetElementsByTag(string tagName)
+        {
+            return webBrowser.Document.GetElementsByTagName(tagName);
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -72,13 +79,13 @@ namespace Audio_Master
             List<string> webSongs = new List<string>();
             List<string> webLyrics = new List<string>();
 
-            foreach (HtmlElement el in webBrowser1.Document.GetElementsByTagName("td"))
+            foreach (HtmlElement el in GetElementsByTag("td"))
             {
                 if (el.OuterHtml.Contains("wrapWords"))
                     webSongs.Add(el.InnerHtml.Remove(el.InnerHtml.Length - 1));
             }
 
-            foreach (HtmlElement el in webBrowser1.Document.GetElementsByTagName("td"))
+            foreach (HtmlElement el in GetElementsByTag("td"))
             {
                 if (el.Id != null && el.Id.Contains("lyrics_"))
                     webLyrics.Add(el.InnerText.ToString().Remove(0, 1));
@@ -122,8 +129,8 @@ namespace Audio_Master
 
             if (Albums[CurrentIndex].NullCount > 0)
             {
-                webBrowser1.Navigate(Albums[CurrentIndex].URL);
-                txtURL.Text = Albums[CurrentIndex].URL;
+                webBrowser.Navigate(Albums[CurrentIndex].Url);
+                txtUrl.Text = Albums[CurrentIndex].Url;
                 _timer.Start();
             }
             else
@@ -132,17 +139,18 @@ namespace Audio_Master
             }
         }
 
-        private void webBrowser1_Navigated(object sender, WebBrowserNavigatedEventArgs e)
+        private void webBrowser_Navigated(object sender, WebBrowserNavigatedEventArgs e)
         {
-            txtURL.Text = webBrowser1.Url.ToString();
+            txtUrl.Text = webBrowser.Url.ToString();
             Album a = Albums[CurrentIndex];
-            lblDetails.Text = String.Format("Count: {0}, Null: {1}, NA: {2}", a.SongTitles.Count, a.NullCount, a.NACount);
+            lblDetails.Text = String.Format(
+                "Count: {0}, Null: {1}, NA: {2}", a.SongTitles.Count, a.NullCount, a.NACount);
             _timer.Start();
         }
 
         private void btnCollapse_Click(object sender, EventArgs e)
         {
-            foreach (HtmlElement el in webBrowser1.Document.GetElementsByTagName("a"))
+            foreach (HtmlElement el in GetElementsByTag("a"))
             {
                 if (el.Id != null && el.Id.Contains("lyricsButton"))
                     el.InvokeMember("onclick");

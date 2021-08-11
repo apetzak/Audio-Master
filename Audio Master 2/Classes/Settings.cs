@@ -35,16 +35,23 @@ namespace Audio_Master
                     Type t = o.GetType();
 
                     if (t == typeof(ToolStripTextBox))
-                        values.Add((o as ToolStripTextBox).Name, (o as ToolStripTextBox).Text);
-
-                    else if (t == typeof(ToolStripComboBox)) { }
-                    //defaultValues.Add((o as ToolStripComboBox).Name.Replace("tscb", ""), "");
-
-                    else if (t == typeof(ToolStripMenuItem) && (o as ToolStripMenuItem).Name.Contains("Color"))
-                        values.Add((o as ToolStripMenuItem).Name, (o as ToolStripMenuItem).BackColor.Name);
-
+                    {
+                        var tb = o as ToolStripTextBox;
+                        values.Add(tb.Name, tb.Text);
+                    }
+                    else if (t == typeof(ToolStripComboBox)) 
+                    {
+                        //defaultValues.Add((o as ToolStripComboBox).Name.Replace("tscb", ""), "");
+                    }
                     else if (t == typeof(ToolStripMenuItem))
-                        values.Add((o as ToolStripMenuItem).Name, (o as ToolStripMenuItem).Checked.ToString());
+                    {
+                        var item = o as ToolStripMenuItem;
+
+                        if (item.Name.Contains("Color"))
+                            values.Add(item.Name, item.BackColor.Name);
+                        else
+                            values.Add(item.Name, item.Checked.ToString());
+                    }
                 }
             }
             values.Add("Height", height.ToString());
@@ -78,13 +85,23 @@ namespace Audio_Master
             {
                 Type t = o.GetType();
                 if (t == typeof(ToolStripTextBox))
-                    (o as ToolStripTextBox).Text = values[(o as ToolStripTextBox).Name];
+                {
+                    var tb = o as ToolStripTextBox;
+                    tb.Text = values[tb.Name];
+                }
                 else if (t == typeof(ToolStripComboBox))
-                    { }
-                else if (t == typeof(ToolStripMenuItem) && (o as ToolStripMenuItem).Name.Contains("Color"))
-                    (o as ToolStripMenuItem).BackColor = Color.FromName(values[(o as ToolStripMenuItem).Name]);
+                { 
+                
+                }
                 else if (t == typeof(ToolStripMenuItem))
-                    (o as ToolStripMenuItem).Checked = values[(o as ToolStripMenuItem).Name] == "True" ? true : false;
+                {
+                    var item = o as ToolStripMenuItem;
+
+                    if (item.Name.Contains("Color"))
+                        item.BackColor = Color.FromName(values[item.Name]);
+                    else
+                        item.Checked = values[item.Name] == "True" ? true : false;
+                }
             }
         }
 

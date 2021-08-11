@@ -6,6 +6,7 @@ using System.IO;
 using System.Net;
 using System.Windows.Forms;
 using YoutubeExplode;
+using Kaztep.Extensions;
 
 namespace Audio_Master
 {
@@ -13,21 +14,22 @@ namespace Audio_Master
     {
         public static HtmlWeb Web = new HtmlWeb();
         public static HtmlAgilityPack.HtmlDocument Document = new HtmlAgilityPack.HtmlDocument();
-        private frmMain _frmMain;
         private List<string> _webSongs = new List<string>();
         private List<string> _webLyrics = new List<string>();
         private List<string> _webTimes = new List<string>();
         private readonly YoutubeClient _client = new YoutubeClient();
         private Dictionary<string, string> _lyrics = new Dictionary<string, string>();
+        private Timer _timer = new Timer();
+        private int _ticks = 0;
 
         public Scraper(frmMain m)
         {
-            _frmMain = m;
-            timer.Tick += Timer_Tick;
+            _timer.Tick += Timer_Tick;
         }
 
-        public void ScrapeWiki(string url)
+        public Dictionary<string, string> ScrapeWiki(string url)
         {
+            var dictionary = new Dictionary<string, string>();
             Document = Web.Load(url);
 
             HtmlNode node = SelectNode("image");
@@ -35,11 +37,15 @@ namespace Audio_Master
             imageUrl = "https://" + imageUrl.Remove(imageUrl.IndexOf("\""));
             GetImage(imageUrl);
 
-            _frmMain.txtArtist.Text = SelectNode("contributor").InnerText;
-            _frmMain.txtAlbum.Text = SelectNode("summary album").InnerHtml;
+            dictionary.Add("Artist", SelectNode("contributor").InnerText);
+            dictionary.Add("Album", SelectNode("summary album").InnerHtml);
 
             string yearText = SelectNode("published").InnerText;
-            _frmMain.txtYear.Text = yearText.Remove(0, yearText.Length - 4);
+            yearText = yearText.Remove(0, yearText.Length - 4);
+
+            dictionary.Add("Year", yearText);
+
+            return dictionary;
         }
 
         private HtmlNode SelectNode(string c)
@@ -47,12 +53,13 @@ namespace Audio_Master
             return Document.DocumentNode.SelectNodes($"//*[@class='{c}']")[0];
         }
 
-        public void ScrapeArchives()
+        public Dictionary<string, string> ScrapeArchives()
         {
-            var doc = _frmMain.browser.Document;
+            var doc = Program.MainForm.GetBrowser().Document;
+            var dictionary = new Dictionary<string, string>();
 
-            if (_frmMain.browser.Document == null)
-                return;
+            if (doc == null)
+                return dictionary;
 
             // open lyrics
             foreach (HtmlElement el in doc.GetElementsByTagName("a"))
@@ -61,45 +68,47 @@ namespace Audio_Master
                     el.InvokeMember("onclick");
             }
 
-            // get artist
-            if (_frmMain.txtArtist.Text == "")
+            foreach (HtmlElement el in doc.GetElementsByTagName("h2"))
             {
-                foreach (HtmlElement el in doc.GetElementsByTagName("h2"))
-                    _frmMain.txtArtist.Text = el.InnerText;
+                dictionary.Add("Artist", el.InnerText);
+                break;
             }
 
-            // get album name
-            if (_frmMain.txtAlbum.Text == "")
+            foreach (HtmlElement el in doc.GetElementsByTagName("h1"))
             {
-                foreach (HtmlElement el in doc.GetElementsByTagName("h1"))
-                    _frmMain.txtAlbum.Text = el.InnerText;
+                dictionary.Add("Album", el.InnerText);
+                break;
             }
 
             // get year
             foreach (HtmlElement el in doc.GetElementsByTagName("dd"))
             {
-                if (el.InnerHtml != null && el.OuterHtml.Contains(", ") || el.OuterHtml.Contains("19") || el.OuterHtml.Contains("20"))
+                if (el.InnerHtml != null && el.OuterHtml.ContainsAny(", ", "19", "20"))
                 {
-                    _frmMain.txtYear.Text = el.InnerHtml.Remove(0, el.InnerHtml.Length - 5).TrimEnd(' ');
+                    var year = el.InnerHtml.Remove(0, el.InnerHtml.Length - 5).TrimEnd(' ');
+                    dictionary.Add("Year", year);
                     break;
                 }
             }
 
-            // get type
-            foreach (HtmlElement el in doc.GetElementsByTagName("dd"))
+            if (dictionary.ContainsKey("Album"))
             {
-                if (el.InnerHtml.Contains("EP"))
+                // get type
+                foreach (HtmlElement el in doc.GetElementsByTagName("dd"))
                 {
-                    _frmMain.txtAlbum.Text = _frmMain.txtAlbum.Text + " (EP)";
-                    break;
+                    if (el.InnerHtml.Contains("EP"))
+                    {
+                        dictionary["Album"] += " (EP)";
+                        break;
+                    }
                 }
             }
-          
+
             // get songs
             foreach (HtmlElement el in doc.GetElementsByTagName("td"))
             {
                 if (el.OuterHtml.Contains("wrapWords"))
-                    _webSongs.Add(el.InnerHtml.Remove(el.InnerHtml.Length - 1).Replace("&amp;", "&"));
+                    _webSongs.Add(el.InnerHtml.TrimEnd(1).Replace("&amp;", "&"));
             }
 
             // get web times
@@ -113,33 +122,63 @@ namespace Audio_Master
             }
 
             // get image
-            string html = "";
+            string html = String.Empty;
             foreach (HtmlElement el in doc.GetElementsByTagName("a"))
             {
                 if (el.OuterHtml.Contains("id=cover"))
                     html = el.OuterHtml;
             }
 
-            string url = "";
+            string url = String.Empty;
             foreach (string s in html.Split(' '))
             {
                 if (!s.StartsWith("href"))
                     continue;
-                
+
                 url = s.Remove(0, 6);
                 url = url.Remove(url.Length - 1);
-                if (!url.Contains(".jpg") && !url.Contains(".gif") && !url.Contains(".jpeg"))
+                if (!url.ContainsAny(".jpg", ".gif", ".jpeg"))
                     url = url + ".jpg";
-                break;            
+                break;
             }
 
-            if (url == "")
-                return;
+            if (url == String.Empty)
+                return dictionary;
 
             GetImage(url);
 
             // Scrape lyrics in 3 seconds...
-            timer.Start();
+            _timer.Start();
+
+            return dictionary;
+        }
+
+        private string GetImageUrlFromArchives(System.Windows.Forms.HtmlDocument doc)
+        {
+            string html = String.Empty;
+            foreach (HtmlElement el in doc.GetElementsByTagName("a"))
+            {
+                if (el.OuterHtml.Contains("id=cover"))
+                {
+                    html = el.OuterHtml;
+                    break;
+                }
+            }
+
+            string url = String.Empty;
+            foreach (string s in html.Split(' '))
+            {
+                if (!s.StartsWith("href"))
+                    continue;
+
+                url = s.Remove(0, 6);
+                url = url.Remove(url.Length - 1);
+                if (!url.ContainsAny(".jpg", ".gif", ".jpeg"))
+                    url += ".jpg";
+                break;
+            }
+
+            return url;
         }
    
         public void GetImage(string url)
@@ -150,28 +189,26 @@ namespace Audio_Master
             WebResponse webResponse = webRequest.GetResponse();
             Stream stream = webResponse.GetResponseStream();
             Image i = Image.FromStream(stream);
-            _frmMain.pbCoverArt.Image = i;
+            Program.MainForm.GetPictureBox().Image = i;
             webResponse.Close();
         }
 
-        public Timer timer = new Timer();
-        public int ticks = 0;
         public void Timer_Tick(object sender, EventArgs e)
         {
             // Delay 3 seconds to ensure that lyrics have loaded (might need more time).
-            ticks++;
-            if (ticks < 30) 
+            _ticks++;
+            if (_ticks < 30) 
                 return;
             
-            timer.Stop();
-            ticks = 0;
+            _timer.Stop();
+            _ticks = 0;
 
             ScrapeLyrics(); 
         }
 
         private void ScrapeLyrics()
         {
-            foreach (HtmlElement el in _frmMain.browser.Document.GetElementsByTagName("td"))
+            foreach (HtmlElement el in Program.MainForm.GetBrowser().Document.GetElementsByTagName("td"))
             {
                 if (el.Id != null && el.Id.Contains("lyrics_"))
                 {
@@ -194,11 +231,11 @@ namespace Audio_Master
 
             foreach (string s in _webSongs)
             {
-                if (!_frmMain.Lyrics.ContainsKey(s))
-                    _frmMain.Lyrics.Add(s, _webLyrics[_webSongs.IndexOf(s)]);
+                if (!Program.MainForm.Lyrics.ContainsKey(s))
+                    Program.MainForm.Lyrics.Add(s, _webLyrics[_webSongs.IndexOf(s)]);
             }
 
-            _frmMain.btnAdd.Enabled = true;
+            Program.MainForm.SetAddButtonEnabled(true);
             _webSongs = new List<string>();
             _webLyrics = new List<string>();
             _webTimes = new List<string>();

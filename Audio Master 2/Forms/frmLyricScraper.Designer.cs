@@ -29,8 +29,8 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmLyricScraper));
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
-            this.txtURL = new System.Windows.Forms.TextBox();
+            this.webBrowser = new System.Windows.Forms.WebBrowser();
+            this.txtUrl = new System.Windows.Forms.TextBox();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnNext = new System.Windows.Forms.Button();
             this.lblDetails = new System.Windows.Forms.Label();
@@ -39,24 +39,24 @@
             // 
             // webBrowser1
             // 
-            this.webBrowser1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.webBrowser.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.webBrowser1.Location = new System.Drawing.Point(12, 40);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.ScriptErrorsSuppressed = true;
-            this.webBrowser1.Size = new System.Drawing.Size(1136, 703);
-            this.webBrowser1.TabIndex = 0;
-            this.webBrowser1.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.webBrowser1_Navigated);
+            this.webBrowser.Location = new System.Drawing.Point(12, 40);
+            this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser.Name = "webBrowser1";
+            this.webBrowser.ScriptErrorsSuppressed = true;
+            this.webBrowser.Size = new System.Drawing.Size(1136, 703);
+            this.webBrowser.TabIndex = 0;
+            this.webBrowser.Navigated += new System.Windows.Forms.WebBrowserNavigatedEventHandler(this.webBrowser_Navigated);
             // 
             // txtURL
             // 
-            this.txtURL.Location = new System.Drawing.Point(12, 12);
-            this.txtURL.Name = "txtURL";
-            this.txtURL.Size = new System.Drawing.Size(1136, 22);
-            this.txtURL.TabIndex = 1;
-            this.txtURL.Leave += new System.EventHandler(this.txtURL_Leave);
+            this.txtUrl.Location = new System.Drawing.Point(12, 12);
+            this.txtUrl.Name = "txtURL";
+            this.txtUrl.Size = new System.Drawing.Size(1136, 22);
+            this.txtUrl.TabIndex = 1;
+            this.txtUrl.Leave += new System.EventHandler(this.txtURL_Leave);
             // 
             // btnSave
             // 
@@ -112,8 +112,8 @@
             this.Controls.Add(this.lblDetails);
             this.Controls.Add(this.btnNext);
             this.Controls.Add(this.btnSave);
-            this.Controls.Add(this.txtURL);
-            this.Controls.Add(this.webBrowser1);
+            this.Controls.Add(this.txtUrl);
+            this.Controls.Add(this.webBrowser);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "frmLyricScraper";
             this.Text = "Lyric Scraper";
@@ -124,8 +124,8 @@
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser webBrowser1;
-        private System.Windows.Forms.TextBox txtURL;
+        private System.Windows.Forms.WebBrowser webBrowser;
+        private System.Windows.Forms.TextBox txtUrl;
         private System.Windows.Forms.Button btnSave;
         private System.Windows.Forms.Button btnNext;
         private System.Windows.Forms.Label lblDetails;

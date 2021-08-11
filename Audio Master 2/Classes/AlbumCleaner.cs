@@ -33,17 +33,17 @@ namespace Audio_Master
                                 o = meta.Tag.Pictures[0];
 
                             if (o == null)
-                                o = "";
+                                o = String.Empty;
 
-                            string gen = "";
+                            string gen = String.Empty;
                             if (meta.Tag.Genres.Count() > 0)
                                 gen = meta.Tag.Genres[0];
 
-                            string group = "";
+                            string group = String.Empty;
                             if (meta.Tag.Grouping != null)
                                 group = meta.Tag.Genres[0];
 
-                            string art = "";
+                            string art = String.Empty;
                             if (meta.Tag.Performers.Count() > 0)
                                 art = meta.Tag.Performers[0];
 

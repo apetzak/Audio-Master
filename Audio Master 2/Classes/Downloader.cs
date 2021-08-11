@@ -56,7 +56,8 @@ namespace Audio_Master
             // download to temp file
             Directory.CreateDirectory(s_TempDirectoryPath);
             string streamFileExt = streamInfo.Container.GetFileExtension();
-            string streamFilePath = Path.Combine(s_TempDirectoryPath, $"{Guid.NewGuid()}.{streamFileExt}");
+            string streamFilePath = Path.Combine(
+                s_TempDirectoryPath, $"{Guid.NewGuid()}.{streamFileExt}");
             await _client.DownloadMediaStreamAsync(streamInfo, streamFilePath);
 
             // Create directories          

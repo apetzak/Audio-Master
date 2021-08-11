@@ -23,9 +23,10 @@ namespace Audio_Master
 
         public void SetFieldValues()
         {
-            Song s = _frmMain.Songs[_frmMain.GetSelectedRows()[0]];
-            int selected = _frmMain.GetSelectedRows().Count;
-            if (_frmMain.GetSelectedRows().Count == 1)
+            var selectedRows = _frmMain.GetSelectedRows();
+            Song s = _frmMain.Songs[selectedRows[0]];
+
+            if (selectedRows.Count == 1)
             {
                 rtbLyrics.Text = s.Lyrics;
             }
@@ -46,7 +47,7 @@ namespace Audio_Master
             bool sameComposer = true;
             bool sameDiscNumber = true;
 
-            foreach (int i in _frmMain.GetSelectedRows())
+            foreach (int i in selectedRows)
             {
                 if (_frmMain.Songs[i].Artist != s.Artist)
                     sameArtist = false;
@@ -82,15 +83,17 @@ namespace Audio_Master
                 txtComposer.Text = s.Composer;
         }
 
-        private void btnOK_Click(object sender, System.EventArgs e)
+        private void btnOK_Click(object sender, EventArgs e)
         {
+            DataGridView dgv = _frmMain.GetDataGrid();
+
             foreach (int i in _frmMain.GetSelectedRows())
             {
-                _frmMain.dataGrid.Rows[i].Cells[2].Value = txtArtist.Text;
-                _frmMain.dataGrid.Rows[i].Cells[3].Value = txtAlbum.Text;
-                _frmMain.dataGrid.Rows[i].Cells[4].Value = txtYear.Text;
-                _frmMain.dataGrid.Rows[i].Cells[5].Value = txtGrouping.Text;
-                _frmMain.dataGrid.Rows[i].Cells[6].Value = txtGenre.Text;
+                dgv.Rows[i].Cells[2].Value = txtArtist.Text;
+                dgv.Rows[i].Cells[3].Value = txtAlbum.Text;
+                dgv.Rows[i].Cells[4].Value = txtYear.Text;
+                dgv.Rows[i].Cells[5].Value = txtGrouping.Text;
+                dgv.Rows[i].Cells[6].Value = txtGenre.Text;
 
                 _frmMain.Songs[i].Artist = txtArtist.Text;
                 _frmMain.Songs[i].Album = txtAlbum.Text;
@@ -102,21 +105,21 @@ namespace Audio_Master
 
                 if (!String.IsNullOrEmpty(rtbLyrics.Text))
                 {
-                    _frmMain.dataGrid.Rows[i].Cells[8].Value = true;
-                    _frmMain.dataGrid.Rows[i].Cells[8].ToolTipText = rtbLyrics.Text;
+                    dgv.Rows[i].Cells[8].Value = true;
+                    dgv.Rows[i].Cells[8].ToolTipText = rtbLyrics.Text;
                     _frmMain.Songs[i].Lyrics = rtbLyrics.Text;
                 }
             }
 
-            this.Close();
+            Close();
         }
 
-        private void btnCancel_Click(object sender, System.EventArgs e)
+        private void btnCancel_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Close();
         }
 
-        private void pbCoverArt_Click(object sender, System.EventArgs e)
+        private void pbCoverArt_Click(object sender, EventArgs e)
         {
             Image i = Clipboard.GetImage();
             if (i != null)

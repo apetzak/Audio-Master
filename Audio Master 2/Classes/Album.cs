@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
+using Kaztep.Extensions;
 
 namespace Audio_Master
 {
@@ -18,13 +19,13 @@ namespace Audio_Master
         public int Year;
         public string ID;
         public string Time;
-        public bool NeedsSplit = false;
         public Image Image;
+        public bool NeedsSplit = false;
         public string Directory;
         public int NullCount;
         public int NACount;
-        public string URL;
-        private DataGridView _grid;
+        public string Url;
+        private readonly DataGridView _grid;
 
         public Album(DataGridView dgv = null)
         {
@@ -36,14 +37,14 @@ namespace Audio_Master
             Directory = directory;
             Artist = artist;
             Name = name;
-            URL = String.Format("https://www.metal-archives.com/albums/{0}/{1}", Artist, Name);
+            Url = String.Format("https://www.metal-archives.com/albums/{0}/{1}", Artist, Name);
 
             var d = new DirectoryInfo(Directory);
             FileInfo[] Files = d.GetFiles();
 
             foreach (FileInfo file in Files)
             {
-                if (file.Name.EndsWith(".mp3") || file.Name.EndsWith(".m4a"))
+                if (file.Name.EndsWithAny(".mp3", ".m4a"))
                     SongTitles.Add(file.Name);
             }
 
@@ -82,26 +83,13 @@ namespace Audio_Master
 
                 int i = 1;
                 foreach (Song _s in Songs)
-                {
-                    _s.TrackNumber = i;
-                    i++;
-                }
+                    _s.TrackNumber = i++;
             }
 
-            foreach (Song _s in Songs)
-            {
-                foreach (DataGridViewRow dgvr in _grid.Rows)
-                {
-                    if (dgvr.Cells[1].Value.ToString() == _s.Name)
-                    {
-                        dgvr.Cells[0].Value = _s.TrackNumber;
-                        break;
-                    }
-                }
-            }
+            SetTrackNumbersOnGrid();
 
             _grid.Rows[index].DefaultCellStyle.BackColor = SystemColors.Window;
-            _grid.Sort(this._grid.Columns["cTrackNumber"], ListSortDirection.Ascending);         
+            _grid.Sort(_grid.Columns["cTrackNumber"], ListSortDirection.Ascending);
 
             foreach (DataGridViewRow dgvr in _grid.Rows)
             {
@@ -113,7 +101,24 @@ namespace Audio_Master
             }
         }
 
-        // calculate time for each song after starting times are set
+        private void SetTrackNumbersOnGrid()
+        {
+            foreach (Song _s in Songs)
+            {
+                foreach (DataGridViewRow dgvr in _grid.Rows)
+                {
+                    if (dgvr.Cells[1].Value.ToString() == _s.Name)
+                    {
+                        dgvr.Cells[0].Value = _s.TrackNumber;
+                        break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculate time for each song after starting times are set.
+        /// </summary>
         public void SetTimes()
         {
             int i = 0;
@@ -128,10 +133,12 @@ namespace Audio_Master
                 {
                     var times = Time.Split(':');
                     int totalSeconds = 0;
+
                     if (times.Length == 2)
-                        totalSeconds = Convert.ToInt32(times[0]) * 60 + Convert.ToInt32(times[1]);
+                        totalSeconds = times[0].ToInt() * 60 + times[1].ToInt();
                     else if (times.Length == 3)
-                        totalSeconds = Convert.ToInt32(times[0]) * 3600 + Convert.ToInt32(times[1]) * 60 + Convert.ToInt32(times[2]);               
+                        totalSeconds = times[0].ToInt() * 3600 + times[1].ToInt() * 60 + times[2].ToInt();
+                    
                     seconds = totalSeconds - Songs[i].StartSeconds;
                 }
                 int minutes = 0;
@@ -146,23 +153,3 @@ namespace Audio_Master
         }
     }
 }
-
-//public class Date
-//{
-//    private int month = 7;  // Backing store
-
-//    public int Month
-//    {
-//        get
-//        {
-//            return month;
-//        }
-//        set
-//        {
-//            if ((value > 0) && (value < 13))
-//            {
-//                month = value;
-//            }
-//        }
-//    }
-//}

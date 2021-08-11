@@ -80,7 +80,7 @@ namespace Audio_Master
             {
                 minutes = Convert.ToInt32(StartTime.Remove(2));
                 if (StartTime.Remove(0, 3).Length > 2)
-                    StartTime = StartTime.Remove(StartTime.Length - 1);
+                    StartTime = StartTime.TrimEnd(1);
                 seconds = Convert.ToInt32(StartTime.Remove(0, 3));
             }
             StartSeconds = seconds + (minutes * 60);
